@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addon id="org.nonononoki.justdubs"
+version="0.0.1"
+name="JustDubs"
+provider-name="Nonononoki">
+<requires>
+  <import addon="xbmc.python" version="2.25.0"/>
+  <import addon="script.module.resolveurl" version="5.0.00"/>
+  <import addon="script.module.parsedom" version="0.9.1"/>
+  <import addon="script.module.requests" version="0.9.1"/>
+</requires>
+
+<extension point="xbmc.python.pluginsource" library="addon.py">
+  <provides>video</provides>
+</extension>
+<extension point="xbmc.addon.metadata">
+  <summary lang="en">JustDubs Unofficial Kodi Addon</summary>
+  <description lang="en_GB">Source code: https://github.com/Nonononoki/justdubs
+  Donate if you like my addon: https://www.paypal.me/nonononoki
+  Donate to keep the servers up: https://www.gofundme.com/justdubs-server-donations</description>
+  <disclaimer lang="en_GB">Source code: https://github.com/Nonononoki/justdubs
+  Donate if you like my addon: https://www.paypal.me/nonononoki
+  Donate to keep the servers up: https://www.gofundme.com/justdubs-server-donations</disclaimer>
+  <assets>
+    <icon>icon.png</icon>
+    <fanart>fanart.jpg</fanart>
+  </assets>
+</extension>
+</addon>

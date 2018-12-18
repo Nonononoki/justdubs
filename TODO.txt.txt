@@ -1,0 +1,4 @@
+- multiple hosts if available
+- decode html-encoded names
+- include search by first letter
+- include search with input
