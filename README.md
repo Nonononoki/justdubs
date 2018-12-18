@@ -1,5 +1,6 @@
 # Unofficial Kodi addon for JustDubs
 
+
 Tested on Kodi 18 RC3 on Windows
 
 How to install:
@@ -10,4 +11,5 @@ How to install:
 5. Profit!
 
 Donate if you like my addon: https://www.paypal.me/nonononoki
+
 Donate to keep the servers up: https://www.gofundme.com/justdubs-server-donations
