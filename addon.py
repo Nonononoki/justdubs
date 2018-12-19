@@ -78,6 +78,26 @@ def list_episodes(url):
 	for i in range(len(urls)):
 		#list_item = xbmcgui.ListItem(label=html.unescape(des[i]))
 		list_item = xbmcgui.ListItem(label=des[i])
+		url = get_url(action='list_streams', url=urls[i])
+		is_folder = True
+		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
+		
+	xbmcplugin.endOfDirectory(HANDLE)
+
+def list_streams(url):
+
+	url = unquote(url)
+	print('stream_url: ' + url)
+	
+	response = HTTP.request('GET', url, headers=HEADER)
+	WebHTML = response.data
+	#print(WebHTML);
+	
+	urls = common.parseDOM(WebHTML, "iframe", ret = 'src')
+	print repr(urls)
+	
+	for i in range(len(urls)):
+		list_item = xbmcgui.ListItem(label=get_domain_name(urls[i]))
 		url = get_url(action='play_video', url=urls[i])
 		is_folder = True
 		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
@@ -90,17 +110,6 @@ def play_video(url):
 	url = unquote(url)
 	print('video_url: ' + url)
 	
-	response = HTTP.request('GET', url, headers=HEADER)
-	WebHTML = response.data
-	#print(WebHTML);
-	
-	iframe = common.parseDOM(WebHTML, "iframe", ret = 'src')
-	print repr(iframe)
-	
-	#TODO: add option to select multiple hosts
-	url = iframe[0]
-	print('new url:' + url)
-	
 	play_item = xbmcgui.ListItem(path=url)
 	vid_url = play_item.getfilename()
 	stream_url = resolveurl.resolve(url)
@@ -109,26 +118,28 @@ def play_video(url):
 
 
 def get_url(**kwargs):
-    return '{0}?{1}'.format(ADDON_URL, urlencode(kwargs))
+	return '{0}?{1}'.format(ADDON_URL, urlencode(kwargs))
+	
+def get_domain_name(url):
+	return url.split("://")[1].split("/")[0]
 
 def router(parameters):
 
-    params = dict(parse_qsl(parameters))
-    # Check the parameters passed to the plugin
-    if params:
-        if params['action'] == 'list_episodes':
-			print('starting list_episodes')
+	params = dict(parse_qsl(parameters))
+	# Check the parameters passed to the plugin
+	if params:
+		if params['action'] == 'list_episodes':
 			list_episodes(params['url'])
-			
-        elif params['action'] == 'play_video':
-            play_video(params['url'])
-			
-        else:
-            list_all()
-    else:
-        list_all()
+		elif params['action'] == 'list_streams':
+			list_streams(params['url'])
+		elif params['action'] == 'play_video':
+			play_video(params['url'])
+		else:
+			list_all()
+	else:
+		list_all()
 
 
 if __name__ == '__main__':
-    router(sys.argv[2][1:])
+	router(sys.argv[2][1:])
 	
