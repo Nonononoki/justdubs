@@ -9,7 +9,7 @@ import xbmcplugin
 import urllib3
 import re
 import resolveurl
-#import html #TODO: Unescape HTML
+import HTMLParser
 from urllib import unquote, urlencode
 from urlparse import parse_qsl
 
@@ -48,8 +48,7 @@ def list_all():
 	print repr(des)
 	 	
 	for i in range(len(urls)):
-		#list_item = xbmcgui.ListItem(label=html.unescape(des[i]))
-		list_item = xbmcgui.ListItem(label=des[i])
+		list_item = xbmcgui.ListItem(label=HTMLParser.HTMLParser().unescape(des[i]))
 		url = get_url(action='list_episodes', url=urls[i])
 		is_folder = True
 		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
@@ -76,8 +75,7 @@ def list_episodes(url):
 	print repr(des)
 	 	
 	for i in range(len(urls)):
-		#list_item = xbmcgui.ListItem(label=html.unescape(des[i]))
-		list_item = xbmcgui.ListItem(label=des[i])
+		list_item = xbmcgui.ListItem(label=HTMLParser.HTMLParser().unescape(des[i]))
 		url = get_url(action='list_streams', url=urls[i])
 		is_folder = True
 		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
@@ -126,7 +124,7 @@ def get_domain_name(url):
 def router(parameters):
 
 	params = dict(parse_qsl(parameters))
-	# Check the parameters passed to the plugin
+
 	if params:
 		if params['action'] == 'list_episodes':
 			list_episodes(params['url'])
