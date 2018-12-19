@@ -48,7 +48,7 @@ def list_all():
 	print repr(des)
 	 	
 	for i in range(len(urls)):
-		list_item = xbmcgui.ListItem(label=HTMLParser.HTMLParser().unescape(des[i]))
+		list_item = xbmcgui.ListItem(label=HTMLParser.HTMLParser().unescape(des[i]))			  
 		url = get_url(action='list_episodes', url=urls[i])
 		is_folder = True
 		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
@@ -59,9 +59,9 @@ def list_all():
 def list_episodes(url):
 
 	print('started list_episodes')
-	url = unquote(url) 
+	url = BASE + unquote(url) 
 	
-	response = HTTP.request('GET', BASE + url, headers=HEADER)
+	response = HTTP.request('GET', url, headers=HEADER)
 	WebHTML = response.data
 	#print(WebHTML);
 	
@@ -70,12 +70,18 @@ def list_episodes(url):
 	
 	urls = common.parseDOM(div, "a", ret = "href")
 	des = common.parseDOM(div, "div", attrs = { "class": "col-xs-7 col-sm-8" })
+	thumb = common.parseDOM(WebHTML, "img", attrs = { "class": "img-responsive" }, ret = 'src')[0]
+	txtDiv = common.parseDOM(WebHTML, "div", attrs = { "class": "field field-name-field-plot field-type-text-with-summary field-label-hidden" })[0]
+	txt = common.parseDOM(txtDiv, "p")[0];
 	
 	print repr(urls)
 	print repr(des)
-	 	
+	
 	for i in range(len(urls)):
 		list_item = xbmcgui.ListItem(label=HTMLParser.HTMLParser().unescape(des[i]))
+		list_item.setArt({'thumb': thumb, 'icon': thumb, 'fanart': thumb})
+		list_item.setInfo('video', {'plot': txt})
+		
 		url = get_url(action='list_streams', url=urls[i])
 		is_folder = True
 		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
@@ -118,6 +124,7 @@ def play_video(url):
 def get_url(**kwargs):
 	return '{0}?{1}'.format(ADDON_URL, urlencode(kwargs))
 	
+
 def get_domain_name(url):
 	return url.split("://")[1].split("/")[0]
 

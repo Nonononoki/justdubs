@@ -1,4 +1,4 @@
-- multiple hosts if available
-- decode html-encoded names
-- include search by first letter
+- include filter by first letter
+- include filter by genre
 - include search with input
+- downloads
