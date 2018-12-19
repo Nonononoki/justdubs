@@ -17,7 +17,11 @@ provider-name="Nonononoki">
   <summary lang="en">JustDubs Unofficial Kodi Addon</summary>
   <source>https://github.com/Nonononoki/justdubs</source>
   <website>https://www.paypal.me/nonononoki</website>
-  <description lang="en_GB">Donate to keep the servers up: https://www.gofundme.com/justdubs-server-donations</description>
+  <description lang="en_GB">
+  Buy me a coffee: https://www.paypal.me/nonononoki
+  
+  Donate to keep the servers up: https://www.gofundme.com/justdubs-server-donations
+  </description>
   <assets>
     <icon>icon.png</icon>
     <fanart>fanart.jpg</fanart>
