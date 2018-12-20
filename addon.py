@@ -182,6 +182,31 @@ def list_genre2(url):
 			
 	add_next_pager(webHTML, "li", "class", "pager-next", 'list_genre2', BASE)		
 	xbmcplugin.endOfDirectory(HANDLE)
+	
+def list_new(url = 'https://justdubs.org/latest-dubbed-anime'):
+	
+	response = HTTP.request('GET', url, headers=HEADER)
+	webHTML = response.data
+	#print(WebHTML);
+	
+	div = common.parseDOM(webHTML, "div", attrs = { "class": "table-responsive" })
+	print repr(div)
+	
+	urls = common.parseDOM(div, "a", ret = "href")
+	des = common.parseDOM(div, "a")
+	
+	print repr(urls)
+	print repr(des)
+	 	
+	for i in range(len(urls)):
+		if des[i].find("<img") < 0:
+			list_item = xbmcgui.ListItem(label=HTMLParser.HTMLParser().unescape(des[i]))			  
+			url = get_url(action='list_episodes', url= BASE + urls[i])
+			is_folder = True
+			xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
+		
+	add_next_pager(webHTML, "li", "class", "next", 'list_new', BASE)	
+	xbmcplugin.endOfDirectory(HANDLE)
 
 def list_search():
 	kb = xbmc.Keyboard('', 'What Anime are you looking for?')
@@ -272,12 +297,17 @@ def add_next_pager(html, el, attr, value, action, base):
 	div = common.parseDOM(html, el, attrs = { attr: value })
 	print repr(div)
 	
-	url = common.parseDOM(div, "a", ret = "href")[0]
-	 	
-	list_item = xbmcgui.ListItem("Load more...")			  
-	url = get_url(action=action, url= base + url)
-	is_folder = True
-	xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder) 
+	url = common.parseDOM(div, "a", ret = "href")
+	
+	
+	if(len(url) > 0):
+		url = url[0]
+		print(base + url)
+			
+		list_item = xbmcgui.ListItem("Load more...")			  
+		url = get_url(action=action, url= base + url)
+		is_folder = True
+		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder) 
 
 
 def play_video(url):
@@ -314,6 +344,11 @@ def router(parameters):
 			list_genre()
 		elif params['action'] == 'list_genre2':
 			list_genre2(params['url'])
+		elif params['action'] == 'list_new':
+			if 'url' in params:
+				list_new(params['url'])
+			else:
+				list_new()
 		elif params['action'] == 'list_search':
 			list_search()
 		elif params['action'] == 'list_episodes':
