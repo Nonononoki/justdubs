@@ -108,7 +108,7 @@ def list_alphabetical():
 		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
 		
 	xbmcplugin.endOfDirectory(HANDLE)
-	
+
 def list_alphabetical2(url):
 
 	url = unquote(url) 
@@ -126,6 +126,7 @@ def list_alphabetical2(url):
 	print repr(des)
 	 	
 	for i in range(len(urls)):
+		#ignore images with links
 		if des[i].find("<img") < 0:
 			list_item = xbmcgui.ListItem(label=HTMLParser.HTMLParser().unescape(des[i]))			  
 			url = get_url(action='list_episodes', url= BASE + urls[i])
@@ -134,6 +135,53 @@ def list_alphabetical2(url):
 		
 	xbmcplugin.endOfDirectory(HANDLE)
 
+def list_genre():
+	response = HTTP.request('GET', 'https://justdubs.org/more-genre', headers=HEADER)
+	webHTML = response.data
+	#print(WebHTML);
+	
+	div = common.parseDOM(webHTML, "div", attrs = { "class": "view-content" })
+	print repr(div)
+	
+	urls = common.parseDOM(div, "a", ret = "href")
+	des = common.parseDOM(div, "a")
+	
+	print repr(urls)
+	print repr(des)
+	 	
+	for i in range(len(urls)):
+		list_item = xbmcgui.ListItem(label=HTMLParser.HTMLParser().unescape(des[i]))			  
+		url = get_url(action='list_genre2', url= BASE + urls[i])
+		is_folder = True
+		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
+		
+	xbmcplugin.endOfDirectory(HANDLE)
+
+def list_genre2(url):
+	url = unquote(url) 
+	response = HTTP.request('GET', url, headers=HEADER)
+	webHTML = response.data
+	#print(WebHTML);
+	
+	div = common.parseDOM(webHTML, "div", attrs = { "class": "table-responsive" })
+	print repr(div)
+	
+	urls = common.parseDOM(div, "a", ret = "href")
+	des = common.parseDOM(div, "a")
+	
+	print repr(urls)
+	print repr(des)
+	 	
+	for i in range(len(urls)):
+		#ignore images with links
+		if des[i].find("<img") < 0:
+			list_item = xbmcgui.ListItem(label=HTMLParser.HTMLParser().unescape(des[i]))			  
+			url = get_url(action='list_episodes', url= BASE + urls[i])
+			is_folder = True
+			xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
+			
+	add_next_pager(webHTML, "li", "class", "pager-next", 'list_genre2', BASE)		
+	xbmcplugin.endOfDirectory(HANDLE)
 
 def list_search():
 	kb = xbmc.Keyboard('', 'What Anime are you looking for?')
@@ -217,6 +265,19 @@ def list_streams(url):
 		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
 		
 	xbmcplugin.endOfDirectory(HANDLE)
+	
+	
+def add_next_pager(html, el, attr, value, action, base):
+	
+	div = common.parseDOM(html, el, attrs = { attr: value })
+	print repr(div)
+	
+	url = common.parseDOM(div, "a", ret = "href")[0]
+	 	
+	list_item = xbmcgui.ListItem("Load more...")			  
+	url = get_url(action=action, url= base + url)
+	is_folder = True
+	xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder) 
 
 
 def play_video(url):
@@ -249,6 +310,10 @@ def router(parameters):
 			list_alphabetical()
 		elif params['action'] == 'list_alphabetical2':
 			list_alphabetical2(params['url'])
+		elif params['action'] == 'list_genre':
+			list_genre()
+		elif params['action'] == 'list_genre2':
+			list_genre2(params['url'])
 		elif params['action'] == 'list_search':
 			list_search()
 		elif params['action'] == 'list_episodes':
