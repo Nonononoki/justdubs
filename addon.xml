@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="org.nonononoki.justdubs"
-version="0.0.3"
+version="0.1.0"
 name="JustDubs"
 provider-name="Nonononoki">
 <requires>
