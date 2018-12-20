@@ -40,7 +40,7 @@ def main_menu():
 	is_folder = True
 	xbmcplugin.addDirectoryItem(HANDLE, url, item_all, is_folder)
 	
-	item_alphabetical = xbmcgui.ListItem(label='Anime By Name')			  
+	item_alphabetical = xbmcgui.ListItem(label='Anime By First Letter')			  
 	url = get_url(action='list_alphabetical')
 	is_folder = True
 	xbmcplugin.addDirectoryItem(HANDLE, url, item_alphabetical, is_folder)
@@ -85,6 +85,55 @@ def list_all():
 		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
 		
 	xbmcplugin.endOfDirectory(HANDLE)
+
+def list_alphabetical():
+
+	response = HTTP.request('GET', ALL_URL, headers=HEADER)
+	webHTML = response.data
+	#print(WebHTML);
+	
+	div = common.parseDOM(webHTML, "ul", attrs = { "class": "tabs--primary nav nav-tabs" })
+	print repr(div)
+	
+	urls = common.parseDOM(div, "a", ret = "href")
+	des = common.parseDOM(div, "a")
+	
+	print repr(urls)
+	print repr(des)
+	 	
+	for i in range(len(urls)):
+		list_item = xbmcgui.ListItem(label=HTMLParser.HTMLParser().unescape(des[i]))			  
+		url = get_url(action='list_alphabetical2', url= BASE + urls[i])
+		is_folder = True
+		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
+		
+	xbmcplugin.endOfDirectory(HANDLE)
+	
+def list_alphabetical2(url):
+
+	url = unquote(url) 
+	response = HTTP.request('GET', url, headers=HEADER)
+	webHTML = response.data
+	#print(WebHTML);
+	
+	div = common.parseDOM(webHTML, "div", attrs = { "class": "views-fluid-grid" })
+	print repr(div)
+	
+	urls = common.parseDOM(div, "a", ret = "href")
+	des = common.parseDOM(div, "a")
+	
+	print repr(urls)
+	print repr(des)
+	 	
+	for i in range(len(urls)):
+		if des[i].find("<img") < 0:
+			list_item = xbmcgui.ListItem(label=HTMLParser.HTMLParser().unescape(des[i]))			  
+			url = get_url(action='list_episodes', url= BASE + urls[i])
+			is_folder = True
+			xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
+		
+	xbmcplugin.endOfDirectory(HANDLE)
+
 
 def list_search():
 	kb = xbmc.Keyboard('', 'What Anime are you looking for?')
@@ -196,6 +245,10 @@ def router(parameters):
 	if params:
 		if params['action'] == 'list_all':
 			list_all()
+		elif params['action'] == 'list_alphabetical':
+			list_alphabetical()
+		elif params['action'] == 'list_alphabetical2':
+			list_alphabetical2(params['url'])
 		elif params['action'] == 'list_search':
 			list_search()
 		elif params['action'] == 'list_episodes':
