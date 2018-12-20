@@ -6,6 +6,7 @@
 import sys
 import xbmcgui
 import xbmcplugin
+import urllib
 import urllib3
 import re
 import resolveurl
@@ -32,8 +33,38 @@ ALL_URL = 'https://justdubs.org/anime-list'
 
 HTTP = urllib3.PoolManager()
 
-def list_all():
+def main_menu():
 
+	item_all = xbmcgui.ListItem(label='All Anime')			  
+	url = get_url(action='list_all')
+	is_folder = True
+	xbmcplugin.addDirectoryItem(HANDLE, url, item_all, is_folder)
+	
+	item_alphabetical = xbmcgui.ListItem(label='Anime By Name')			  
+	url = get_url(action='list_alphabetical')
+	is_folder = True
+	xbmcplugin.addDirectoryItem(HANDLE, url, item_alphabetical, is_folder)
+	
+	item_genre = xbmcgui.ListItem(label='Anime By Genre')			  
+	url = get_url(action='list_genre')
+	is_folder = True
+	xbmcplugin.addDirectoryItem(HANDLE, url, item_genre, is_folder)
+	
+	item_new = xbmcgui.ListItem(label='New Anime')			  
+	url = get_url(action='list_new')
+	is_folder = True
+	xbmcplugin.addDirectoryItem(HANDLE, url, item_new, is_folder)
+	
+	item_search = xbmcgui.ListItem(label='Search')			  
+	url = get_url(action='list_search')
+	is_folder = True
+	xbmcplugin.addDirectoryItem(HANDLE, url, item_search, is_folder)
+		
+	xbmcplugin.endOfDirectory(HANDLE)
+
+
+def list_all():
+	
 	response = HTTP.request('GET', ALL_URL, headers=HEADER)
 	webHTML = response.data
 	#print(WebHTML);
@@ -49,17 +80,47 @@ def list_all():
 	 	
 	for i in range(len(urls)):
 		list_item = xbmcgui.ListItem(label=HTMLParser.HTMLParser().unescape(des[i]))			  
-		url = get_url(action='list_episodes', url=urls[i])
+		url = get_url(action='list_episodes', url= BASE + urls[i])
 		is_folder = True
 		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
 		
 	xbmcplugin.endOfDirectory(HANDLE)
+
+def list_search():
+	kb = xbmc.Keyboard('', 'What Anime are you looking for?')
+	kb.doModal()
+	if (kb.isConfirmed()):
+		search1 = 'https://justdubs.org/search/node/type%3Aanime_movies%2Canime_series%20%22'
+		search2 = '%22'
+		url = search1 + urllib.quote(kb.getText(), safe='') + search2
+		print url
+		response = HTTP.request('GET', url, headers=HEADER)
+		webHTML = response.data
+		div = common.parseDOM(webHTML, "ol", attrs = { "class": "search-results node-results" })
+		print repr(div)
+		
+		urls = common.parseDOM(div, "a", ret = "href")
+		des = common.parseDOM(div, "a")
+		
+		print repr(urls)
+		print repr(des)
+			
+		for i in range(len(urls)):
+			list_item = xbmcgui.ListItem(label=HTMLParser.HTMLParser().unescape(des[i]))			  
+			url = get_url(action='list_episodes', url=urls[i])
+			is_folder = True
+			xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
+			
+		xbmcplugin.endOfDirectory(HANDLE)
 	
+	else: 
+		main_menu()
 
 def list_episodes(url):
 
 	print('started list_episodes')
-	url = BASE + unquote(url) 
+	url = unquote(url) 
+	print(url)
 	
 	response = HTTP.request('GET', url, headers=HEADER)
 	WebHTML = response.data
@@ -133,16 +194,20 @@ def router(parameters):
 	params = dict(parse_qsl(parameters))
 
 	if params:
-		if params['action'] == 'list_episodes':
+		if params['action'] == 'list_all':
+			list_all()
+		elif params['action'] == 'list_search':
+			list_search()
+		elif params['action'] == 'list_episodes':
 			list_episodes(params['url'])
 		elif params['action'] == 'list_streams':
 			list_streams(params['url'])
 		elif params['action'] == 'play_video':
 			play_video(params['url'])
 		else:
-			list_all()
+			main_menu()
 	else:
-		list_all()
+		main_menu()
 
 
 if __name__ == '__main__':

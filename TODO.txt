@@ -1,4 +1,1 @@
-- include filter by first letter
-- include filter by genre
-- include search with input
 - downloads
