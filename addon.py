@@ -6,6 +6,8 @@
 import sys
 import xbmcgui
 import xbmcplugin
+import xbmcaddon
+import xbmcvfs
 import urllib
 import urllib3
 import re
@@ -261,17 +263,18 @@ def list_episodes(url):
 	print repr(des)
 	
 	for i in range(len(urls)):
-		list_item = xbmcgui.ListItem(label=HTMLParser.HTMLParser().unescape(des[i]))
-		list_item.setArt({'thumb': thumb, 'icon': thumb, 'fanart': thumb})
+		name = HTMLParser.HTMLParser().unescape(des[i])
+		list_item = xbmcgui.ListItem(label=name)
+		list_item.setArt({'thumb': thumb, 'fanart': thumb})
 		list_item.setInfo('video', {'plot': txt})
 		
-		url = get_url(action='list_streams', url=urls[i])
+		url = get_url(action='list_streams', url=urls[i], name=name)
 		is_folder = True
 		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
 		
 	xbmcplugin.endOfDirectory(HANDLE)
 
-def list_streams(url):
+def list_streams(url, name):
 
 	url = unquote(url)
 	print('stream_url: ' + url)
@@ -285,11 +288,14 @@ def list_streams(url):
 	
 	for i in range(len(urls)):
 		list_item = xbmcgui.ListItem(label=get_domain_name(urls[i]))
+		cmd = 'XBMC.RunPlugin({})'.format(get_url(action='download_video', url=urls[i], name=name))
+		#list_item.addContextMenuItems([('Download', "download_video(url = %s, name = %s)"  % (urls[i], name))])
+		list_item.addContextMenuItems([('Download', cmd)])
 		url = get_url(action='play_video', url=urls[i])
 		is_folder = True
 		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
 		
-	xbmcplugin.endOfDirectory(HANDLE)
+	xbmcplugin.endOfDirectory(HANDLE) 
 	
 	
 def add_next_pager(html, el, attr, value, action, base):
@@ -298,7 +304,6 @@ def add_next_pager(html, el, attr, value, action, base):
 	print repr(div)
 	
 	url = common.parseDOM(div, "a", ret = "href")
-	
 	
 	if(len(url) > 0):
 		url = url[0]
@@ -320,7 +325,47 @@ def play_video(url):
 	stream_url = resolveurl.resolve(url)
 	print('direct link: ' + stream_url)
 	xbmc.Player().play(stream_url) 
+	
 
+def download_video(url, name):
+
+	url = unquote(url)
+	print('download ' + url + ": " + name)
+	
+	url = resolveurl.resolve(url)
+	addon = xbmcaddon.Addon()
+	dl = addon.getSetting('download')
+	print(dl)
+		
+	if(len(dl) <= 0):
+		xbmcgui.Dialog().ok('Download folder not set', 'Please set the download path in the addon settings') #
+	else:
+		download = dl + name
+		#xbmc.translatePath(download)
+		print(download)
+		
+		xbmcvfs.mkdir(download)
+		dl_file = dl + name + "\\video.mp4"
+		
+		url = url.split('|')[0]
+		
+		print(url)
+		#url = "https://www.adobe.com/support/products/enterprise/knowledgecenter/media/c4611_sample_explain.pdf" #test
+		download_helper(url, dl_file, name)
+	
+def download_helper(url, dest, name):
+    dp = xbmcgui.DialogProgressBG()
+    dp.create("Downloading...", name)
+    urllib.urlretrieve(url,dest,lambda nb, bs, fs, url=url: dl_hook(nb,bs,fs,url,dp, name))
+
+def dl_hook(numblocks, blocksize, filesize, url=None,dp=None, name=''):
+	try:
+		percent = min((numblocks*blocksize*100)/filesize, 100)
+		print percent
+		dp.update(percent)
+	except:
+		dp.close()
+		xbmcgui.Dialog().ok("Download failed", name)
 
 def get_url(**kwargs):
 	return '{0}?{1}'.format(ADDON_URL, urlencode(kwargs))
@@ -328,6 +373,7 @@ def get_url(**kwargs):
 
 def get_domain_name(url):
 	return url.split("://")[1].split("/")[0]
+
 
 def router(parameters):
 
@@ -351,10 +397,12 @@ def router(parameters):
 				list_new()
 		elif params['action'] == 'list_search':
 			list_search()
+		elif params['action'] == 'download_video':
+			download_video(params['url'], params['name'])
 		elif params['action'] == 'list_episodes':
 			list_episodes(params['url'])
 		elif params['action'] == 'list_streams':
-			list_streams(params['url'])
+			list_streams(params['url'], params['name'])
 		elif params['action'] == 'play_video':
 			play_video(params['url'])
 		else:
