@@ -340,11 +340,17 @@ def download_video(url, name):
 	if(len(dl) <= 0):
 		xbmcgui.Dialog().ok('Download folder not set', 'Please set the download path in the addon settings') #
 	else:
+	
+		regs = re.findall('[a-zA-Z0-9_. -]', name)
+		name = ''.join(regs)
+		print(name)
+		
 		download = dl + name
 		#xbmc.translatePath(download)
 		print(download)
 		
 		xbmcvfs.mkdir(download)
+		
 		dl_file = dl + name + "\\video.mp4"
 		
 		url = url.split('|')[0]
