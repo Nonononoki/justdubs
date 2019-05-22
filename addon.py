@@ -15,6 +15,7 @@ import resolveurl
 import HTMLParser
 from urllib import unquote, urlencode
 from urlparse import parse_qsl
+import requests
 
 import CommonFunctions
 common = CommonFunctions
@@ -33,7 +34,7 @@ HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHT
 BASE = 'https://justdubs.org'
 ALL_URL = 'https://justdubs.org/anime-list'	  
 
-HTTP = urllib3.PoolManager()
+#HTTP = urllib3.PoolManager()
 
 def main_menu():
 
@@ -67,9 +68,8 @@ def main_menu():
 
 def list_all():
 	
-	response = HTTP.request('GET', ALL_URL, headers=HEADER)
-	webHTML = response.data
-	#print(WebHTML);
+	webHTML = url_to_string(ALL_URL)
+	print(webHTML)
 	
 	div = common.parseDOM(webHTML, "div", attrs = { "class": "view-content" })
 	print repr(div)
@@ -90,9 +90,8 @@ def list_all():
 
 def list_alphabetical():
 
-	response = HTTP.request('GET', ALL_URL, headers=HEADER)
-	webHTML = response.data
-	#print(WebHTML);
+	webHTML = url_to_string(ALL_URL)
+	print(webHTML)
 	
 	div = common.parseDOM(webHTML, "ul", attrs = { "class": "tabs--primary nav nav-tabs" })
 	print repr(div)
@@ -114,9 +113,10 @@ def list_alphabetical():
 def list_alphabetical2(url):
 
 	url = unquote(url) 
-	response = HTTP.request('GET', url, headers=HEADER)
-	webHTML = response.data
-	#print(WebHTML);
+	print(url)
+
+	webHTML = url_to_string(url)
+	print(webHTML)
 	
 	div = common.parseDOM(webHTML, "div", attrs = { "class": "views-fluid-grid" })
 	print repr(div)
@@ -138,9 +138,8 @@ def list_alphabetical2(url):
 	xbmcplugin.endOfDirectory(HANDLE)
 
 def list_genre():
-	response = HTTP.request('GET', 'https://justdubs.org/more-genre', headers=HEADER)
-	webHTML = response.data
-	#print(WebHTML);
+	webHTML = url_to_string("https://justdubs.org/more-genre")
+	print(webHTML)
 	
 	div = common.parseDOM(webHTML, "div", attrs = { "class": "view-content" })
 	print repr(div)
@@ -161,9 +160,10 @@ def list_genre():
 
 def list_genre2(url):
 	url = unquote(url) 
-	response = HTTP.request('GET', url, headers=HEADER)
-	webHTML = response.data
-	#print(WebHTML);
+	print(url)
+
+	webHTML = url_to_string(url)
+	print(webHTML)
 	
 	div = common.parseDOM(webHTML, "div", attrs = { "class": "table-responsive" })
 	print repr(div)
@@ -187,9 +187,10 @@ def list_genre2(url):
 	
 def list_new(url = 'https://justdubs.org/latest-dubbed-anime'):
 	
-	response = HTTP.request('GET', url, headers=HEADER)
-	webHTML = response.data
-	#print(WebHTML);
+	print(url)
+
+	webHTML = url_to_string(url)
+	print(webHTML)
 	
 	div = common.parseDOM(webHTML, "div", attrs = { "class": "table-responsive" })
 	print repr(div)
@@ -218,8 +219,10 @@ def list_search():
 		search2 = '%22'
 		url = search1 + urllib.quote(kb.getText(), safe='') + search2
 		print url
-		response = HTTP.request('GET', url, headers=HEADER)
-		webHTML = response.data
+
+		webHTML = url_to_string(url)
+		print(webHTML)
+
 		div = common.parseDOM(webHTML, "ol", attrs = { "class": "search-results node-results" })
 		print repr(div)
 		
@@ -246,17 +249,16 @@ def list_episodes(url):
 	url = unquote(url) 
 	print(url)
 	
-	response = HTTP.request('GET', url, headers=HEADER)
-	WebHTML = response.data
-	#print(WebHTML);
+	webHTML = url_to_string(url)
+	print(webHTML)
 	
-	div = common.parseDOM(WebHTML, "div", attrs = { "class": "list-group col-xs-12" })
+	div = common.parseDOM(webHTML, "div", attrs = { "class": "list-group col-xs-12" })
 	print repr(div)
 	
 	urls = common.parseDOM(div, "a", ret = "href")
 	des = common.parseDOM(div, "div", attrs = { "class": "col-xs-7 col-sm-8" })
-	thumb = common.parseDOM(WebHTML, "img", attrs = { "class": "img-responsive" }, ret = 'src')[0]
-	txtDiv = common.parseDOM(WebHTML, "div", attrs = { "class": "field field-name-field-plot field-type-text-with-summary field-label-hidden" })[0]
+	thumb = common.parseDOM(webHTML, "img", attrs = { "class": "img-responsive" }, ret = 'src')[0]
+	txtDiv = common.parseDOM(webHTML, "div", attrs = { "class": "field field-name-field-plot field-type-text-with-summary field-label-hidden" })[0]
 	txt = common.parseDOM(txtDiv, "p")[0];
 	
 	print repr(urls)
@@ -265,7 +267,8 @@ def list_episodes(url):
 	for i in range(len(urls)):
 		name = HTMLParser.HTMLParser().unescape(des[i])
 		list_item = xbmcgui.ListItem(label=name)
-		list_item.setArt({'thumb': thumb, 'fanart': thumb})
+		#list_item.setArt({'thumb': thumb, 'fanart': thumb})
+		list_item.setArt({'poster': thumb, 'banner': thumb})
 		list_item.setInfo('video', {'plot': txt})
 		
 		url = get_url(action='list_streams', url=urls[i], name=name)
@@ -279,11 +282,10 @@ def list_streams(url, name):
 	url = unquote(url)
 	print('stream_url: ' + url)
 	
-	response = HTTP.request('GET', url, headers=HEADER)
-	WebHTML = response.data
-	#print(WebHTML);
+	webHTML = url_to_string(url)
+	print(webHTML)
 	
-	urls = common.parseDOM(WebHTML, "iframe", ret = 'src')
+	urls = common.parseDOM(webHTML, "iframe", ret = 'src')
 	print repr(urls)
 	
 	for i in range(len(urls)):
@@ -379,6 +381,15 @@ def get_url(**kwargs):
 
 def get_domain_name(url):
 	return url.split("://")[1].split("/")[0]
+
+def url_to_string(url):
+	#response = HTTP.request('GET', url, headers=HEADER)
+	response = requests.get(url, headers=HEADER)
+	print(response)
+	#webHTML = response.data
+	webHTML = response.content
+	print(webHTML)
+	return webHTML
 
 
 def router(parameters):
