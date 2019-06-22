@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="org.nonononoki.justdubs"
-version="0.2.1"
+version="0.2.2"
 name="JustDubs"
 provider-name="Nonononoki">
 <requires>
@@ -20,7 +20,7 @@ provider-name="Nonononoki">
   <description lang="en_GB">
   Buy me a coffee: https://www.paypal.me/nonononoki
   
-  Donate to keep the servers up: https://www.gofundme.com/justdubs-server-donations
+  Donate to keep the servers up: https://www.gofundme.com/jd-server-and-domain-funds
   </description>
   <assets>
     <icon>icon.png</icon>

@@ -13,6 +13,18 @@ import urllib3
 import re
 import resolveurl
 import HTMLParser
+
+try: 
+	import urlresolver
+except: 
+	pass
+
+try: 
+	import resolveurl
+except: 
+	pass
+
+import HTMLParser
 from urllib import unquote, urlencode
 from urlparse import parse_qsl
 import requests
@@ -35,6 +47,36 @@ BASE = 'https://justdubs.org'
 ALL_URL = 'https://justdubs.org/anime-list'	  
 
 #HTTP = urllib3.PoolManager()
+
+def unescape(s):
+	#return HTMLParser.HTMLParser().unescape(s)
+	return urllib.unquote(s)
+
+def mp4cloud(url):
+	if "player.mp4cloud.net" in url and "id=" in url:
+		html_content =  url_to_string(url)
+		#
+		script_length = 8
+		html_content = html_content[script_length:]
+		print(html_content)
+		#</script>
+		html_content = html_content[:(script_length+1)*(-1)]
+		splits = html_content.split(';', 1)
+		content1 = splits[0]
+		content2 = splits[1]
+		print(html_content)
+		content1 = eval(content1)
+		print(content1)
+
+		content2 = eval(content2)
+		print(content2)
+
+		id = url.split("id=")[1]
+		print(data)
+		mp4upload = "https://www.mp4upload.com/embed-" + id + ".html"
+		return mp4upload
+	else:
+		return url
 
 def main_menu():
 
@@ -321,10 +363,28 @@ def play_video(url):
 
 	url = unquote(url)
 	print('video_url: ' + url)
+	url = mp4cloud(url)
+	print('video_url: ' + url)
 	
 	play_item = xbmcgui.ListItem(path=url)
 	vid_url = play_item.getfilename()
-	stream_url = resolveurl.resolve(url)
+
+	stream_url = ""
+	try:
+		stream_url = resolveurl.resolve(url)
+	except:
+		stream_url = ""
+	
+	if not stream_url:
+		print("resolve url could not be found")
+		print(stream_url)
+		try:
+			stream_url = urlresolver.resolve(url)
+		except:
+			stream_url = ""
+	else:
+		print("everything is fine")
+
 	print('direct link: ' + stream_url)
 	xbmc.Player().play(stream_url) 
 	
@@ -333,8 +393,21 @@ def download_video(url, name):
 
 	url = unquote(url)
 	print('download ' + url + ": " + name)
+	url = mp4cloud(url)
+	print('download ' + url + ": " + name)
 	
-	url = resolveurl.resolve(url)
+	try:
+		download_url = resolveurl.resolve(url)
+	except:
+		download_url = ""
+
+
+	if not download_url:
+		try:
+			download_url = urlresolver.resolve(url)
+		except:
+			download_url = ""
+
 	addon = xbmcaddon.Addon()
 	dl = addon.getSetting('download')
 	print(dl)
@@ -355,9 +428,9 @@ def download_video(url, name):
 		
 		dl_file = dl + name + "\\video.mp4"
 		
-		url = url.split('|')[0]
+		download_url = download_url.split('|')[0]
 		
-		print(url)
+		print(download_url)
 		#url = "https://www.adobe.com/support/products/enterprise/knowledgecenter/media/c4611_sample_explain.pdf" #test
 		download_helper(url, dl_file, name)
 	
@@ -430,4 +503,3 @@ def router(parameters):
 
 if __name__ == '__main__':
 	router(sys.argv[2][1:])
-	
