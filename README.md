@@ -8,9 +8,7 @@
 4. ???
 5. Profit!
 
-
-
-
+Note: Mp4cloud is NOT supported. Partial support ONLY if it embeds an mp4upload stream!
 
 Donate if you like my addon: https://www.paypal.me/nonononoki
 
