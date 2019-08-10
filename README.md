@@ -8,10 +8,8 @@
 4. ???
 5. Profit!
 
-
-
-
+Note: Mp4cloud is NOT supported. Partial support ONLY if it embeds an mp4upload stream!
 
 Donate if you like my addon: https://www.paypal.me/nonononoki
 
-Donate to keep the servers up: https://www.gofundme.com/justdubs-server-donations
+Donate to keep the servers up: https://www.gofundme.com/f/justdubs-server-fee-domains
