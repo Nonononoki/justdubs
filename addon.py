@@ -9,7 +9,7 @@ import xbmcplugin
 import xbmcaddon
 import xbmcvfs
 import urllib
-import urllib3
+#import urllib3
 import re
 import resolveurl
 import HTMLParser
@@ -362,15 +362,16 @@ def add_next_pager(html, el, attr, value, action, base):
 def play_video(url):
 
 	url = unquote(url)
-	print('video_url: ' + url)
+	#print('video_url: ' + url)
 	url = mp4cloud(url)
-	print('video_url: ' + url)
+	#print('video_url: ' + url)
 	
 	play_item = xbmcgui.ListItem(path=url)
 	vid_url = play_item.getfilename()
 
 	stream_url = ""
 	try:
+		print("url to resolve: " + url)
 		stream_url = resolveurl.resolve(url)
 	except:
 		stream_url = ""
@@ -392,11 +393,12 @@ def play_video(url):
 def download_video(url, name):
 
 	url = unquote(url)
-	print('download ' + url + ": " + name)
+	#print('download ' + url + ": " + name)
 	url = mp4cloud(url)
-	print('download ' + url + ": " + name)
+	#print('download ' + url + ": " + name)
 	
 	try:
+		print("url to resolve: " + url)
 		download_url = resolveurl.resolve(url)
 	except:
 		download_url = ""
@@ -430,15 +432,19 @@ def download_video(url, name):
 		
 		download_url = download_url.split('|')[0]
 		
-		print(download_url)
 		#url = "https://www.adobe.com/support/products/enterprise/knowledgecenter/media/c4611_sample_explain.pdf" #test
-		download_helper(url, dl_file, name)
+		download_helper(download_url, dl_file, name)
 	
 def download_helper(url, dest, name):
-    dp = xbmcgui.DialogProgressBG()
-    dp.create("Downloading...", name)
-    urllib.urlretrieve(url,dest,lambda nb, bs, fs, url=url: dl_hook(nb,bs,fs,url,dp, name))
 
+	print("download_url: " + url)
+
+	dp = xbmcgui.DialogProgressBG()
+	dp.create("Downloading...", name)
+	#test
+	#url = "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"
+	urllib.urlretrieve(url,dest,lambda nb, bs, fs, url=url: dl_hook(nb,bs,fs,url,dp, name))
+	
 def dl_hook(numblocks, blocksize, filesize, url=None,dp=None, name=''):
 	try:
 		percent = min((numblocks*blocksize*100)/filesize, 100)
