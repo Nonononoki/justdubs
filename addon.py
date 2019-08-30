@@ -13,6 +13,7 @@ import urllib
 import re
 import resolveurl
 import HTMLParser
+import json
 
 try: 
 	import urlresolver
@@ -310,7 +311,8 @@ def list_episodes(url):
 		name = HTMLParser.HTMLParser().unescape(des[i])
 		list_item = xbmcgui.ListItem(label=name)
 		#list_item.setArt({'thumb': thumb, 'fanart': thumb})
-		list_item.setArt({'poster': thumb, 'banner': thumb})
+		#list_item.setArt({'poster': thumb, 'banner': thumb})
+		list_item.setArt({'banner': thumb})
 		list_item.setInfo('video', {'plot': txt})
 		
 		url = get_url(action='list_streams', url=urls[i], name=name)
@@ -318,6 +320,25 @@ def list_episodes(url):
 		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
 		
 	xbmcplugin.endOfDirectory(HANDLE)
+
+def handle_gcloud_live(url):
+	arr = []
+	split_url = url.split("/v/")
+	new_url = split_url[0] + "/api/source/" + split_url[1]
+	print(new_url)
+	res = requests.post(new_url, headers=HEADER)
+	print(res)
+	#print(res.text)
+	#obj = json.loads(res.text)
+	obj = res.json()
+	data_arr = obj.get("data")
+	for d in data_arr:
+		print(d.get("file"))
+		arr.append(d.get("file"))
+
+	print(arr)
+	return arr
+
 
 def list_streams(url, name):
 
@@ -337,7 +358,14 @@ def list_streams(url, name):
 		list_item.addContextMenuItems([('Download', cmd)])
 		url = get_url(action='play_video', url=urls[i])
 		is_folder = True
-		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
+
+		print(urls[i])
+		if "gcloud.live" in urls[i]:
+			uris = handle_gcloud_live(urls[i])
+			for uri in uris:
+				xbmcplugin.addDirectoryItem(HANDLE, get_url(action='play_video', url=uri), list_item, is_folder)
+		else:
+			xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
 		
 	xbmcplugin.endOfDirectory(HANDLE) 
 	
@@ -360,6 +388,7 @@ def add_next_pager(html, el, attr, value, action, base):
 
 
 def play_video(url):
+
 
 	url = unquote(url)
 	#print('video_url: ' + url)
@@ -387,6 +416,9 @@ def play_video(url):
 		print("everything is fine")
 
 	print('direct link: ' + stream_url)
+
+	if not stream_url:
+		stream_url = url
 	xbmc.Player().play(stream_url) 
 	
 
