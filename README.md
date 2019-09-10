@@ -1,6 +1,6 @@
 # Unofficial Kodi addon for JustDubs
 
-##Click of Watch and Star on the top right to get update notifications :) 
+Click on "Watch" and "Star" on the top right of this page to get update notifications :) 
 
 ### How to install:
 1. Enable unofficial addons in Kodi settings
