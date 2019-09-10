@@ -1,5 +1,6 @@
 # Unofficial Kodi addon for JustDubs
 
+##Click of Watch and Star on the top right to get update notifications :) 
 
 ### How to install:
 1. Enable unofficial addons in Kodi settings
@@ -12,4 +13,4 @@ Note: Mp4cloud is NOT supported. Partial support ONLY if it embeds an mp4upload 
 
 Donate if you like my addon: https://www.paypal.me/nonononoki
 
-Donate to keep the servers up: https://www.gofundme.com/f/justdubs-server-fee-domains
+Donate to keep the servers up: https://www.patreon.com/JustAnimeNetwork
