@@ -235,8 +235,10 @@ def list_new(url = 'https://justdubs.org/latest-dubbed-anime'):
 	webHTML = url_to_string(url)
 	print(webHTML)
 	
-	div = common.parseDOM(webHTML, "div", attrs = { "class": "table-responsive" })
-	print repr(div)
+	section = common.parseDOM(webHTML, "section", attrs = { "id": "block-system-main" })
+	print repr(section)
+
+	div = common.parseDOM(section, "div", attrs = { "class": "table-responsive" })
 	
 	urls = common.parseDOM(div, "a", ret = "href")
 	des = common.parseDOM(div, "a")
@@ -337,7 +339,9 @@ def handle_gcloud_live(url):
 		arr.append(d.get("file"))
 
 	print(arr)
-	return arr
+
+	#return arr
+	return arr[-1] #get last and best stream
 
 
 def list_streams(url, name):
@@ -352,20 +356,36 @@ def list_streams(url, name):
 	print repr(urls)
 	
 	for i in range(len(urls)):
-		list_item = xbmcgui.ListItem(label=get_domain_name(urls[i]))
-		cmd = 'XBMC.RunPlugin({})'.format(get_url(action='download_video', url=urls[i], name=name))
-		#list_item.addContextMenuItems([('Download', "download_video(url = %s, name = %s)"  % (urls[i], name))])
-		list_item.addContextMenuItems([('Download', cmd)])
-		url = get_url(action='play_video', url=urls[i])
-		is_folder = True
 
-		print(urls[i])
-		if "gcloud.live" in urls[i]:
-			uris = handle_gcloud_live(urls[i])
-			for uri in uris:
-				xbmcplugin.addDirectoryItem(HANDLE, get_url(action='play_video', url=uri), list_item, is_folder)
-		else:
-			xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
+		current_url = urls[i]
+		if "gcloud.live" in current_url:
+			current_url = handle_gcloud_live(current_url)
+
+
+		list_item = xbmcgui.ListItem(label=get_domain_name(current_url))
+		cmd = 'XBMC.RunPlugin({})'.format(get_url(action='download_video', url=current_url, name=name))
+		#list_item.addContextMenuItems([('Download', "download_video(url = %s, name = %s)"  % (urls[i], name))])
+		
+
+		list_item.addContextMenuItems([('Download', cmd)])
+		url = get_url(action='play_video', url=current_url)
+		#is_folder = True
+		is_folder = False
+
+		print(current_url)
+
+		list_item.setInfo('video', infoLabels={'title': get_domain_name(current_url),'mediatype': 'episode'})
+		#list_item.setInfo(type='Video')
+		#list_item.setArt({'icon':'', 'thumb':'', 'poster':''})
+		list_item.setProperty('IsPlayable', 'true')
+
+		
+		#if "gcloud.live" in urls[i]:
+		#	uris = handle_gcloud_live(urls[i])
+		#	for uri in uris:
+		#		xbmcplugin.addDirectoryItem(HANDLE, get_url(action='play_video', url=uri), list_item, is_folder)
+		#else:
+		xbmcplugin.addDirectoryItem(HANDLE, url, list_item, is_folder)
 		
 	xbmcplugin.endOfDirectory(HANDLE) 
 	
@@ -394,9 +414,6 @@ def play_video(url):
 	#print('video_url: ' + url)
 	url = mp4cloud(url)
 	#print('video_url: ' + url)
-	
-	play_item = xbmcgui.ListItem(path=url)
-	vid_url = play_item.getfilename()
 
 	stream_url = ""
 	try:
@@ -419,7 +436,10 @@ def play_video(url):
 
 	if not stream_url:
 		stream_url = url
-	xbmc.Player().play(stream_url) 
+
+	play_item = xbmcgui.ListItem(path=stream_url)
+	xbmcplugin.setResolvedUrl(HANDLE, True, listitem=play_item)
+	#xbmc.Player().play(stream_url) 
 	
 
 def download_video(url, name):
