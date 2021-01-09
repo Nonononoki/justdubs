@@ -1,3 +1,5 @@
+Update: Site now uses CloudFlare, impossible to bypass and get link. Repository has been archived
+
 # Unofficial Kodi addon for JustDubs
 
 Click on "Watch" and "Star" on the top right of this page to get update notifications :) 
